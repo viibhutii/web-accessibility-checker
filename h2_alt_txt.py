@@ -1,3 +1,4 @@
+
 # Import libraries
 from pip._vendor import requests
 from bs4 import BeautifulSoup
@@ -5,25 +6,46 @@ import tkinter as tk
 from urllib.parse import urlparse
 #from nltk.corpus import stopwords
 
+# Creates a UI window
+window = tk.Tk()
+
+# Sets the size and title of the window
+window.geometry("800x500")
+window.title("Web Accessibility Checker")
+
+# Creates a label widget with the text "URL" and sets font and padding configurations, 
+# packed to be displayed on UI
+label = tk.Label(window, 
+                 text="URL", 
+                 font=('Arial', 18))
+label.pack(padx=10, 
+           pady=10)
+
+# Creates an entry widget for the URL and sets width and packs it to display on UI
+url_input = tk.StringVar() # Reading from a textbox in string format
+url = tk.Entry(window, 
+               width=80,
+               font=('Arial', 14)
+               )
+url.pack()
+# print("url1", url)
+
 # Function to get article content 
 def get_article_content():
 
-    # ScreenSteps URL
-    url = ("https://snhu.screenstepslive.com/a/1137941-you-attend-blocked")
-
     # Send a request to check for a response and then gather content from URL
-    response = requests.get(url)
+    url_temp = url.get()
+    url_temp.replace(u'\ufeff', '')
+    response = requests.get(url_temp)
     response = response.text
+    print("reponse 2",response)
 
     # Parse html response
     soup = BeautifulSoup(response, 'html.parser')
-
     # Complete article content
     content = soup.find('div', class_='content')
-
     # Aricle title
     header = content.find('h1', class_='article__title').text.strip()
-
     # Each section under an article (i.e., 1 subheader per section)
     sections = content.find_all('div', class_='step step-depth-1')
 
@@ -38,21 +60,10 @@ def display_content():
     # Clears previous content
     output_text.delete(1.0, tk.END) 
 
-    # ARTICLE_TITLE
-    
-    # # Define capitalization convention for the article title
-    # excluded_words = set(stopwords.words('english'))
-
-    # capitalization_convention = all(header.istitle() and header.lower() in excluded_words
-    #                         for header in header.split())
-    
+    # ARTICLE_TITLE 
     # Outputs title onto User Interface (UI). Checks for capitalization and naming convention 
     if not header.startswith("How to"):
         output_text.insert(tk.END, f"Title: {header}\n** Incorrect naming convention. Try starting with 'How to'.\n\n", "red_text")
-
-    # elif capitalization_convention == True:
-    #     output_text.insert(tk.END, f"Title: {header}\n** Incorrect capitalization.\n\n", "red_text")
-    
     else:
         output_text.insert(tk.END, f"Title: {header}\n\n")
 
@@ -89,11 +100,9 @@ def display_content():
                 # message for missing alt texts in red color
                 if not alt:
                     output_text.insert(tk.END, "    Alt Text: Image does not have alt text\n", "red_text")
-                
                 # outputs alt text and message of capitalization error in first word in red color
                 elif alt[0].islower():
                     output_text.insert(tk.END, f"    Alt Text: {alt}\n    ** First letter is not capitalized **", "red_text")
-                
                 # outputs alt text 
                 else:
                     output_text.insert(tk.END, f"    Alt Text: {alt}\n")
@@ -104,28 +113,6 @@ def display_content():
         # Gets and outputs alt text onto the UI for each image(s) under the section
         output_text.insert(tk.END, "\n")
 
-# Creates a UI window
-window = tk.Tk()
-
-# Sets the size and title of the window
-window.geometry("800x500")
-window.title("Web Accessibility Checker")
-
-# Creates a label widget with the text "URL" and sets font and padding configurations, 
-# packed to be displayed on UI
-label = tk.Label(window, 
-                 text="URL", 
-                 font=('Arial', 18))
-label.pack(padx=10, 
-           pady=10)
-
-# Creates an entry widget for the URL and sets width and packs it to display on UI
-url_input = tk.StringVar()
-url = tk.Entry(window, 
-               width=80,
-               font=('Arial', 14)
-               )
-url.pack()
 
 # Creates a button widget, and sets text, font, command to execute when clicked, 
 # padding, and packed to display on UI
@@ -155,7 +142,7 @@ scrollbar.config(command=output_text.yview)
 # Sets foreground color as red for text tag named "red_text"
 output_text.tag_config("red_text", 
                        foreground="red")
-
+# Sets foreground color as blue for text tag named "blue_text"
 output_text.tag_config("blue_text", 
                        foreground="blue")
 
