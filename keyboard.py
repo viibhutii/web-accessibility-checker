@@ -1,21 +1,23 @@
-from tkinter import Tk, Label, Button
+import tkinter as tk
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from urllib.parse import urlparse
 
-def check_keyboard_accessibility(label):
+def is_valid_url(url):
+    parsed_url = urlparse(url)
+    return bool(parsed_url.scheme and parsed_url.netloc)
+
+def check_keyboard_accessibility(label, url):
     # Configure Chrome options
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Run Chrome in headless mode
 
     # Launch the browser using Selenium WebDriver with Chrome options
     driver = webdriver.Chrome(options=chrome_options)
-
-    # ScreenSteps URL
-    url = "https://snhu.screenstepslive.com/a/1137941-you-attend-blocked"
 
     # Navigate to the webpage you are testing
     driver.get(url)
@@ -37,24 +39,33 @@ def check_keyboard_accessibility(label):
     driver.quit()
 
 # Create the UI window
-window = Tk()
+window = tk.Tk()
 
 # Set the dimensions of the window (width x height)
-window.geometry("400x150")
+window.geometry("800x150")
 window.title("Keyboard Accessibility Checker")
 
-# Create a button to trigger the accessibility check
-check_button = Button(window, text="Check Accessibility", command=lambda: check_keyboard_accessibility(result_label))
-check_button.pack(pady=10)
-
 # Create a label to display the result
-result_label = Label(window, text="Click the button to check keyboard accessibility.", font=("Arial", 12))
+result_label = tk.Label(window, text="Enter a URL and click the button to check keyboard accessibility:", font=("Arial", 14))
 result_label.pack(pady=10)
 
+# Create an entry field to input the URL
+url_entry = tk.Entry(window, width=50)
+url_entry.pack(pady=5)
+
+# Create a button to trigger the accessibility check
+def perform_accessibility_check():
+    url = url_entry.get()
+    if is_valid_url(url):
+        check_keyboard_accessibility(result_label, url)
+    else:
+        result_label.config(text="Invalid URL. Please enter a valid URL.", fg='red')
+
+check_button = tk.Button(window, text="Check Accessibility", command=perform_accessibility_check)
+check_button.pack(pady=5)
 
 # Run the UI event loop
 window.mainloop()
-
 
 
 
